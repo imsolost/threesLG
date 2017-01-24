@@ -24,9 +24,9 @@ export default {
   data: function () {
     return {
       tiles: [
-               {x: 1, y: 1, number: '2'},
-               {x: 2, y: 2, number: '3'},
-               {x: 3, y: 3, number: '3'}
+               {x: 1, y: 1, number: 2},
+               {x: 2, y: 2, number: 3},
+               {x: 3, y: 3, number: 3}
              ]
     }
   },
@@ -64,12 +64,22 @@ export default {
     },
 
     isEmpty: function (x, y) {
-      for (let tile of this.tiles) {
-        if (tile.x === x && tile.y === y) {
-          return false
-        }
+
+      if (this.tiles.find(tile => tile.x === x && tile.y === y)) {
+        return false
+      } else {
+        return true
       }
-      return true
+    },
+
+    isSameNumber: function(x, y, number) {
+      if (this.tiles.find(
+        tile => tile.x === x && tile.y === y && tile.number === number
+      )) {
+        return true
+      } else {
+        return false
+      }
     },
 
     moveColumn: function (colNum, direction) {
@@ -77,6 +87,11 @@ export default {
       this.tiles = this.tiles.map(tile => {
         if (tile.x === colNum && this.isEmpty(tile.x + increment, tile.y)) {
           return Object.assign({}, tile, {x: tile.x + increment})
+        } else if (tile.x === colNum && this.isSameNumber(tile.x + increment, tile.y, tile.number)) {
+          return Object.assign({}, tile, {
+            x: tile.x + increment,
+            number: tile.number * 2
+          })
         } else {
           return tile
         }
@@ -119,6 +134,10 @@ export default {
   border: 5px blue solid;
   box-shadow: inset 0 0 10px black;
   position: absolute;
+  text-align: center;
+  font-size: 25px;
+  font-style: bold;
+  line-height: 50px;
   background-color: grey;
   transition: top 0.5s, left 0.5s;
 }
