@@ -6,6 +6,7 @@
       </div>
 
       <div v-for="tile in tiles"
+            v-bind:id="tile.id"
             v-bind:style="{top: `${tile.y * 52}px`, left: `${tile.x * 52}px`}"
             class="tile">
         {{tile.number}}
@@ -22,10 +23,9 @@ export default {
   },
   data: function () {
     return {
-      msg: 'Welcome to Your Vue.js App',
       tiles: [
-               {x: 3, y: 3, number: '3'},
-               {x: 2, y: 2, number: '2'}
+               {x: 3, y: 3, number: '3', id:'unique1'},
+               {x: 2, y: 2, number: '2', id:'unique1'}
              ]
     }
   },
@@ -34,13 +34,17 @@ export default {
       if (event.key === 'ArrowRight') {
         event.preventDefault()
 
-        this.tiles = this.tiles.map(tile => {
-          if (tile.x < 4) {
-            return Object.assign({}, tile, {x: tile.x + 1})
-          } else {
-            return tile
-          }
+        const sortedTiles = this.tiles.sort((tileA, tileB) => {
+          return tileA.x - tileB.x
         })
+
+        for (var index = sortedTiles.length - 1; index >= 0; index--) {
+          if (sortedTiles[index].x < 4 && this.isEmpty(sortedTiles[index].x + 1, sortedTiles[index].y, sortedTiles)) {
+            sortedTiles[index].x = sortedTiles[index].x + 1
+          }
+        }
+
+        this.tiles = sortedTiles
 
       } else if (event.key === 'ArrowLeft') {
         event.preventDefault()
@@ -70,6 +74,15 @@ export default {
           }
         })
       }
+    },
+
+    isEmpty: function (x, y, tiles) {
+      for (let tile of tiles) {
+        if (tile.x === x && tile.y === y) {
+          return false
+        }
+      }
+      return true
     }
   }
 }
@@ -95,5 +108,6 @@ export default {
   height: 50px;
   border: 1px blue solid;
   position: absolute;
+  transition: top 0.5s, left 0.5s;
 }
 </style>
