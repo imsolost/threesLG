@@ -7,7 +7,7 @@
 
       <div v-for="tile in tiles"
             v-bind:id="tile.id"
-            v-bind:style="{top: `${tile.y * 52}px`, left: `${tile.x * 52}px`}"
+            v-bind:style="{top: `${ tile.y * 60}px`, left: `${ tile.x * 60}px`}"
             class="tile">
         {{tile.number}}
       </div>
@@ -24,8 +24,9 @@ export default {
   data: function () {
     return {
       tiles: [
-               {x: 3, y: 3, number: '3', id:'unique1'},
-               {x: 2, y: 2, number: '2', id:'unique1'}
+               {x: 1, y: 1, number: '2'},
+               {x: 2, y: 2, number: '3'},
+               {x: 3, y: 3, number: '3'}
              ]
     }
   },
@@ -34,55 +35,63 @@ export default {
       if (event.key === 'ArrowRight') {
         event.preventDefault()
 
-        const sortedTiles = this.tiles.sort((tileA, tileB) => {
-          return tileA.x - tileB.x
-        })
-
-        for (var index = sortedTiles.length - 1; index >= 0; index--) {
-          if (sortedTiles[index].x < 4 && this.isEmpty(sortedTiles[index].x + 1, sortedTiles[index].y, sortedTiles)) {
-            sortedTiles[index].x = sortedTiles[index].x + 1
-          }
-        }
-
-        this.tiles = sortedTiles
+        this.moveColumn(3, 'right')
+        this.moveColumn(2, 'right')
+        this.moveColumn(1, 'right')
 
       } else if (event.key === 'ArrowLeft') {
         event.preventDefault()
-        this.tiles = this.tiles.map(tile => {
-          if (tile.x > 1) {
-            return Object.assign({}, tile, {x: tile.x - 1})
-          } else {
-            return tile
-          }
-        })
+
+        this.moveColumn(2, 'left')
+        this.moveColumn(3, 'left')
+        this.moveColumn(4, 'left')
+
       } else if (event.key === 'ArrowUp') {
         event.preventDefault()
-        this.tiles = this.tiles.map(tile => {
-          if (tile.y > 1) {
-            return Object.assign({}, tile, {y: tile.y - 1})
-          } else {
-            return tile
-          }
-        })
+
+        this.moveRow(2, 'up')
+        this.moveRow(3, 'up')
+        this.moveRow(4, 'up')
+
       } else if (event.key === 'ArrowDown') {
         event.preventDefault()
-        this.tiles = this.tiles.map(tile => {
-          if (tile.y < 4) {
-            return Object.assign({}, tile, {y: tile.y + 1})
-          } else {
-            return tile
-          }
-        })
+
+        this.moveRow(3, 'down')
+        this.moveRow(2, 'down')
+        this.moveRow(1, 'down')
+
       }
     },
 
-    isEmpty: function (x, y, tiles) {
-      for (let tile of tiles) {
+    isEmpty: function (x, y) {
+      for (let tile of this.tiles) {
         if (tile.x === x && tile.y === y) {
           return false
         }
       }
       return true
+    },
+
+    moveColumn: function (colNum, direction) {
+      const increment = direction === 'right' ? 1 : -1
+      this.tiles = this.tiles.map(tile => {
+        if (tile.x === colNum && this.isEmpty(tile.x + increment, tile.y)) {
+          return Object.assign({}, tile, {x: tile.x + increment})
+        } else {
+          return tile
+        }
+      })
+    },
+
+    moveRow: function (rowNum, direction) {
+      const increment = direction === 'down' ? 1 : -1
+      this.tiles = this.tiles.map(tile => {
+        if (tile.y === rowNum && this.isEmpty(tile.x, tile.y + increment)) {
+          return Object.assign({}, tile, {y: tile.y + increment})
+        } else {
+          return tile
+        }
+      })
     }
   }
 }
@@ -96,18 +105,21 @@ export default {
 .cell {
   width: 50px;
   height: 50px;
-  border: 1px red solid;
+  border: 5px red solid;
 }
 
 .grid {
   position: relative;
+  background-color: white;
 }
 
 .tile {
   width: 50px;
   height: 50px;
-  border: 1px blue solid;
+  border: 5px blue solid;
+  box-shadow: inset 0 0 10px black;
   position: absolute;
+  background-color: grey;
   transition: top 0.5s, left 0.5s;
 }
 </style>
