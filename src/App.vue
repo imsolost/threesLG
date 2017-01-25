@@ -24,14 +24,16 @@ export default {
   data: function () {
     return {
       tiles: [
-               {x: 1, y: 1, number: 2},
+               {x: 1, y: 1, number: 3},
                {x: 2, y: 2, number: 3},
-               {x: 3, y: 3, number: 3}
+               {x: 3, y: 3, number: 3},
+               {x: 4, y: 4, number: 3}
              ]
     }
   },
   methods: {
     move: function (event) {
+      // console.log('tiles:', this.tiles);
       if (event.key === 'ArrowRight') {
         event.preventDefault()
 
@@ -76,8 +78,9 @@ export default {
       const targetTile = this.tiles.find(
         tile => tile.x === x && tile.y === y && tile.number === number
       )
+      console.log(targetTile);
       if (targetTile) {
-        setTimeout(() => {targetTile.number = targetTile.number * 2}, 500)
+        setTimeout(() => {targetTile.number = targetTile.number * 2}, 1000)
         return true
       } else {
         return false
@@ -86,12 +89,14 @@ export default {
 
     moveColumn: function (colNum, direction) {
       const increment = direction === 'right' ? 1 : -1
-      this.tiles = this.tiles.map(tile => {
+      this.tiles = this.tiles.map((tile, index) => {
         if (tile.x === colNum && this.isEmpty(tile.x + increment, tile.y)) {
           return Object.assign({}, tile, {x: tile.x + increment})
         } else if (tile.x === colNum && this.isSameNumber(tile.x + increment, tile.y, tile.number)) {
+          setTimeout(() => this.tiles.splice(index, 1), 1000)
           return Object.assign({}, tile, {
-            x: tile.x + increment
+            x: tile.x + increment,
+            // number: tile.number * 2
           })
         } else {
           return tile
@@ -101,19 +106,33 @@ export default {
 
     moveRow: function (rowNum, direction) {
       const increment = direction === 'down' ? 1 : -1
-      this.tiles = this.tiles.map(tile => {
+      this.tiles = this.tiles.map((tile, index) => {
         if (tile.y === rowNum && this.isEmpty(tile.x, tile.y + increment)) {
           return Object.assign({}, tile, {y: tile.y + increment})
+        } else if ( tile.y === rowNum && this.isSameNumber(tile.x, tile.y + increment, tile.number)) {
+          setTimeout(() => this.tiles.splice(index, 1), 1000)
+          return Object.assign({}, tile, {
+            y: tile.y + increment,
+            // number: tile.number * 2
+          })
         } else {
           return tile
         }
       })
     }
+    //up and left bottom transformed
+    //down and right top transformed
+
+
   }
 }
 </script>
 
 <style>
+/** {
+  filter: invert(100%);
+}*/
+
 .row {
   display: flex;
 }
@@ -133,6 +152,7 @@ export default {
   width: 50px;
   height: 50px;
   border: 5px blue solid;
+  border-radius: 10px;
   box-shadow: inset 0 0 10px black;
   position: absolute;
   text-align: center;
@@ -140,6 +160,6 @@ export default {
   font-style: bold;
   line-height: 50px;
   background-color: grey;
-  transition: top 0.5s, left 0.5s;
+  transition: 1s;
 }
 </style>
