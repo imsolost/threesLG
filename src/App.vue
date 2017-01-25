@@ -73,9 +73,11 @@ export default {
     },
 
     isSameNumber: function(x, y, number) {
-      if (this.tiles.find(
+      const targetTile = this.tiles.find(
         tile => tile.x === x && tile.y === y && tile.number === number
-      )) {
+      )
+      if (targetTile) {
+        setTimeout(() => {targetTile.number = targetTile.number * 2}, 500)
         return true
       } else {
         return false
@@ -89,8 +91,7 @@ export default {
           return Object.assign({}, tile, {x: tile.x + increment})
         } else if (tile.x === colNum && this.isSameNumber(tile.x + increment, tile.y, tile.number)) {
           return Object.assign({}, tile, {
-            x: tile.x + increment,
-            number: tile.number * 2
+            x: tile.x + increment
           })
         } else {
           return tile
