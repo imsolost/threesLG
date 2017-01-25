@@ -27,31 +27,119 @@ export default {
   data: function () {
     return {
       tiles: [
-               {x: 1, y: 1, number: 2},
+               {x: 1, y: 2, number: 1},
                {x: 2, y: 2, number: 2},
-               {x: 3, y: 4, number: 3},
-               {x: 4, y: 4, number: 3}
+               {x: 3, y: 2, number: 3}
              ]
     }
   },
   methods: {
     insertTile (side) {
+      let targetRow, targetCol
       switch (side) {
         case 'left':
-          this.tiles.push({x: 0, y: 3, number: 1})
+          targetRow = this.randomAvailbleRow()
+          if (targetRow) {
+            this.tiles.push({x: 0, y: targetRow, number: 1})
+          }
           break;
         case 'right':
-          this.tiles.push({x: 5, y: 3, number: 1})
+          targetRow = this.randomAvailbleRow()
+          if (targetRow) {
+            this.tiles.push({x: 5, y: targetRow, number: 2})
+          }
           break;
         case 'top':
-          this.tiles.push({x: 3, y: 0, number: 1})
+          targetCol = this.randomAvailbleCol()
+          if (targetCol) {
+            this.tiles.push({x: targetCol, y: 0, number: 2})
+          }
           break;
         case 'bottom':
-          this.tiles.push({x: 3, y: 5, number: 1})
+          targetCol = this.randomAvailbleCol()
+          if (targetCol) {
+            this.tiles.push({x: targetCol, y: 5, number: 1})
+          }
           break;
         default:
 
       }
+    },
+
+    randomAvailbleRow() {
+      const availableRows = []
+      for (var rowNum = 1; rowNum <= 4; rowNum++) {
+        if (this.willThereBeSpaceInRow(rowNum)) {
+          availableRows.push(rowNum)
+        }
+      }
+
+      if (availableRows.length === 0) return undefined
+
+      const randomIndex = Math.floor(Math.random() * availableRows.length)
+
+      return availableRows[randomIndex]
+    },
+
+    willThereBeSpaceInRow(rowNum) {
+      const rowTiles = []
+      let isEmptySpace = false
+
+      for (let colNum = 1; colNum <= 4; colNum++) {
+        rowTiles[colNum] = this.getTileByPosition(colNum, rowNum)
+        if (!rowTiles[colNum]) isEmptySpace = true
+      }
+
+      if (isEmptySpace) return true
+
+      for (let colNum = 1; colNum <= 3; colNum++) {
+        const num1 = rowTiles[colNum]
+        const num2 = rowTiles[colNum + 1]
+
+        if ((num1 === num2 && num1 > 2) || (num1 + num2 === 3)) {
+          return true
+        }
+      }
+
+      return false
+    },
+
+    randomAvailbleCol() {
+      const availableCols = []
+      for (var colNum = 1; colNum <= 4; colNum++) {
+        if (this.willThereBeSpaceInCol(colNum)) {
+          availableCols.push(colNum)
+        }
+      }
+
+      if (availableCols.length === 0) return undefined
+
+      const randomIndex = Math.floor(Math.random() * availableCols.length)
+
+      return availableCols[randomIndex]
+    },
+
+    willThereBeSpaceInCol(colNum) {
+      const colTiles = []
+      let isEmptySpace = false
+
+      for (let rowNum = 1; rowNum <= 4; rowNum++) {
+        colTiles[rowNum] = this.getTileByPosition(colNum, rowNum)
+        if (!colTiles[rowNum]) isEmptySpace = true
+      }
+
+      if (isEmptySpace) return true
+
+      for (let rowNum = 1; rowNum <= 3; rowNum++) {
+        const num1 = colTiles[rowNum]
+        const num2 = colTiles[rowNum + 1]
+
+        if ((num1 === num2 && num1 > 2) || (num1 + num2 === 3)) {
+          return true
+        }
+      }
+
+      return false
     },
 
     move: function (event) {
@@ -103,143 +191,52 @@ export default {
       }
     },
 
-    isEmpty: function (x, y) {
+    combineIfPossible (movingTile, targetTile) {
+      const num1 = movingTile.number
+      const num2 = targetTile.number
 
-      if (this.tiles.find(tile => tile.x === x && tile.y === y)) {
-        return false
-      } else {
-        return true
+      if ((num1 === num2 && num1 > 2) || (num1 + num2 === 3)) {
+        targetTile.number = num1 + num2
+        // setTimeout(() =>
+          this.tiles.splice(this.tiles.indexOf(movingTile), 1)
+        //   transitionInterval
+        // )
       }
     },
 
-    // combine: function(x, y, number) {
-    //   const targetTile = this.tiles.find(
-    //     tile => {
-    //       if (tile.x === x && tile.y === y) {
-    //         switch (number) {
-    //           case 1:
-    //             if (tile.number === 2) {
-    //               setTimeout(() => {tile.number = 3}, transitionInterval)
-    //               return true
-    //             }
-    //             break
-    //
-    //           case 2:
-    //             if (tile.number === 1) {
-    //               setTimeout(() => {tile.number = 3}, transitionInterval)
-    //               return true
-    //             }
-    //             break
-    //           default:
-    //             setTimeout(() => {targetTile.number = targetTile.number * 2}, transitionInterval)
-    //             return true
-    //         }
-    //       } else {
-    //         return false
-    //       }
-    //     }
-    //   )
-    //   if (targetTile) {
-    //     console.log('targetTile.number:', targetTile.number);
-    //     return true
-    //   } else {
-    //     return false
-    //   }
-    // },
-
-    combine (num1, num2) {
-      switch (num2) {
-        case 1:
-          if (num1 === num2 && num1 > 2 || num1 + num2 === 3) {
-            return num1 + num2
-          }
-          break;
-          default:
-          return false
-
-      }
-    },
-
-    getNumberByPosition (x, y) {
-      const foundTile = this.tiles.find(tile => tile.x === x && tile.y === y)
-
-      return foundTile.number
-    },
-
-    canCombine (num1, num2) {
-      switch (num2) {
-        case 1:
-          if (num1 === num2 && num1 > 2) {
-            return true
-          }
-          break;
-        case 2:
-          if (num1 + num2 === 3) {
-            return true
-          }
-          break;
-          default:
-          return false
-
-      }
+    getTileByPosition (x, y) {
+      return this.tiles.find(tile => tile.x === x && tile.y === y)
     },
 
     moveColumn: function (colNum, direction) {
-
       const increment = direction === 'right' ? 1 : -1
 
       const tilesInCol = this.tiles.filter(tile => tile.x === colNum)
 
       tilesInCol.forEach(tile => {
-        const targetX = tile.x + increment
-        const targetY = tile.y
-        if (this.isEmpty(targetX, targetY)) {
+        const targetTile = this.getTileByPosition(tile.x + increment, tile.y)
+        if (!targetTile) {
           tile.x = tile.x + increment
-        } else if (this.canCombine(tile.number, this.getNumberByPosition(targetX, targetY))){
-          this.combine(targetX, targetY, tile.number)
-          console.log('tiles', this.tiles)
-          // this.tiles.splice(index, 1)
-          // TODO: FIX THIS!! this.combine() target? know which is the target and
-          //which is sliding onto the target. keep track of that. splice here
+        } else {
+          this.combineIfPossible(tile, targetTile)
         }
       })
-
-      // this.tiles = this.tiles.map((tile, index) => {
-      //   if (tile.x === colNum && this.isEmpty(tile.x + increment, tile.y)) {
-      //     return Object.assign({}, tile, {x: tile.x + increment})
-      //   } else if (tile.x === colNum && this.combine(tile.x + increment, tile.y, tile.number)) {
-      //     setTimeout(() => this.tiles.splice(index, 1), transitionInterval)
-      //     return Object.assign({}, tile, {
-      //       x: tile.x + increment,
-      //       // number: tile.number * 2
-      //     })
-      //   } else {
-      //     return tile
-      //   }
-      // })
-
     },
 
     moveRow: function (rowNum, direction) {
       const increment = direction === 'down' ? 1 : -1
-      this.tiles = this.tiles.map((tile, index) => {
-        if (tile.y === rowNum && this.isEmpty(tile.x, tile.y + increment)) {
-          return Object.assign({}, tile, {y: tile.y + increment})
-        } else if ( tile.y === rowNum && this.combine(tile.x, tile.y + increment, tile.number)) {
-          setTimeout(() => this.tiles.splice(index, 1), transitionInterval)
-          return Object.assign({}, tile, {
-            y: tile.y + increment,
-            // number: tile.number * 2
-          })
+
+      const tilesInRow = this.tiles.filter(tile => tile.y === rowNum)
+
+      tilesInRow.forEach(tile => {
+        const targetTile = this.getTileByPosition(tile.x , tile.y + increment)
+        if (!targetTile) {
+          tile.y = tile.y + increment
         } else {
-          return tile
+          this.combineIfPossible(tile, targetTile)
         }
       })
     }
-    //up and left bottom transformed
-    //down and right top transformed
-
-
   }
 }
 </script>
