@@ -29,8 +29,8 @@ export default {
       tiles: [
                {x: 1, y: 1, number: 2},
                {x: 2, y: 2, number: 2},
-               {x: 3, y: 3, number: 3},
-               {x: 4, y: 4, number: 2}
+               {x: 3, y: 4, number: 3},
+               {x: 4, y: 4, number: 3}
              ]
     }
   },
@@ -112,38 +112,51 @@ export default {
       }
     },
 
-    combine: function(x, y, number) {
-      const targetTile = this.tiles.find(
-        tile => {
-          if (tile.x === x && tile.y === y) {
-            switch (number) {
-              case 1:
-                if (tile.number === 2) {
-                  setTimeout(() => {tile.number = 3}, transitionInterval)
-                  return true
-                }
-                break
+    // combine: function(x, y, number) {
+    //   const targetTile = this.tiles.find(
+    //     tile => {
+    //       if (tile.x === x && tile.y === y) {
+    //         switch (number) {
+    //           case 1:
+    //             if (tile.number === 2) {
+    //               setTimeout(() => {tile.number = 3}, transitionInterval)
+    //               return true
+    //             }
+    //             break
+    //
+    //           case 2:
+    //             if (tile.number === 1) {
+    //               setTimeout(() => {tile.number = 3}, transitionInterval)
+    //               return true
+    //             }
+    //             break
+    //           default:
+    //             setTimeout(() => {targetTile.number = targetTile.number * 2}, transitionInterval)
+    //             return true
+    //         }
+    //       } else {
+    //         return false
+    //       }
+    //     }
+    //   )
+    //   if (targetTile) {
+    //     console.log('targetTile.number:', targetTile.number);
+    //     return true
+    //   } else {
+    //     return false
+    //   }
+    // },
 
-              case 2:
-                if (tile.number === 1) {
-                  setTimeout(() => {tile.number = 3}, transitionInterval)
-                  return true
-                }
-                break
-              default:
-                setTimeout(() => {targetTile.number = targetTile.number * 2}, transitionInterval)
-                return true
-            }
-          } else {
-            return false
+    combine (num1, num2) {
+      switch (num2) {
+        case 1:
+          if (num1 === num2 && num1 > 2 || num1 + num2 === 3) {
+            return num1 + num2
           }
-        }
-      )
-      if (targetTile) {
-        console.log('targetTile.number:', targetTile.number);
-        return true
-      } else {
-        return false
+          break;
+          default:
+          return false
+
       }
     },
 
@@ -184,6 +197,8 @@ export default {
           tile.x = tile.x + increment
         } else if (this.canCombine(tile.number, this.getNumberByPosition(targetX, targetY))){
           this.combine(targetX, targetY, tile.number)
+          console.log('tiles', this.tiles)
+          // this.tiles.splice(index, 1)
           // TODO: FIX THIS!! this.combine() target? know which is the target and
           //which is sliding onto the target. keep track of that. splice here
         }
