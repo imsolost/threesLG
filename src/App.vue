@@ -16,6 +16,9 @@
 </template>
 
 <script>
+
+const transitionInterval = 0
+
 export default {
   name: 'app',
   created: function () {
@@ -24,44 +27,79 @@ export default {
   data: function () {
     return {
       tiles: [
-               {x: 1, y: 1, number: 3},
-               {x: 2, y: 2, number: 3},
+               {x: 1, y: 1, number: 2},
+               {x: 2, y: 2, number: 2},
                {x: 3, y: 3, number: 3},
-               {x: 4, y: 4, number: 3}
+               {x: 4, y: 4, number: 2}
              ]
     }
   },
   methods: {
+    insertTile (side) {
+      switch (side) {
+        case 'left':
+          this.tiles.push({x: 0, y: 3, number: 1})
+          break;
+        case 'right':
+          this.tiles.push({x: 5, y: 3, number: 1})
+          break;
+        case 'top':
+          this.tiles.push({x: 3, y: 0, number: 1})
+          break;
+        case 'bottom':
+          this.tiles.push({x: 3, y: 5, number: 1})
+          break;
+        default:
+
+      }
+    },
+
     move: function (event) {
       // console.log('tiles:', this.tiles);
       if (event.key === 'ArrowRight') {
         event.preventDefault()
 
-        this.moveColumn(3, 'right')
-        this.moveColumn(2, 'right')
-        this.moveColumn(1, 'right')
+        this.insertTile('left')
+
+        setTimeout( () => {
+          this.moveColumn(3, 'right')
+          this.moveColumn(2, 'right')
+          this.moveColumn(1, 'right')
+          this.moveColumn(0, 'right')
+        }, 5)
 
       } else if (event.key === 'ArrowLeft') {
         event.preventDefault()
 
-        this.moveColumn(2, 'left')
-        this.moveColumn(3, 'left')
-        this.moveColumn(4, 'left')
+        this.insertTile('right')
+        setTimeout( () => {
+          this.moveColumn(2, 'left')
+          this.moveColumn(3, 'left')
+          this.moveColumn(4, 'left')
+          this.moveColumn(5, 'left')
+        }, 5)
 
       } else if (event.key === 'ArrowUp') {
         event.preventDefault()
 
-        this.moveRow(2, 'up')
-        this.moveRow(3, 'up')
-        this.moveRow(4, 'up')
+        this.insertTile('bottom')
+        setTimeout( () => {
+          this.moveRow(2, 'up')
+          this.moveRow(3, 'up')
+          this.moveRow(4, 'up')
+          this.moveRow(5, 'up')
+        }, 5)
 
       } else if (event.key === 'ArrowDown') {
         event.preventDefault()
 
-        this.moveRow(3, 'down')
-        this.moveRow(2, 'down')
-        this.moveRow(1, 'down')
-
+        this.insertTile('top')
+        setTimeout( () => {
+          this.moveRow(3, 'down')
+          this.moveRow(2, 'down')
+          this.moveRow(1, 'down')
+          this.moveRow(0, 'down')
+        }, 5)
       }
     },
 
@@ -74,34 +112,97 @@ export default {
       }
     },
 
-    isSameNumber: function(x, y, number) {
+    combine: function(x, y, number) {
       const targetTile = this.tiles.find(
-        tile => tile.x === x && tile.y === y && tile.number === number
+        tile => {
+          if (tile.x === x && tile.y === y) {
+            switch (number) {
+              case 1:
+                if (tile.number === 2) {
+                  setTimeout(() => {tile.number = 3}, transitionInterval)
+                  return true
+                }
+                break
+
+              case 2:
+                if (tile.number === 1) {
+                  setTimeout(() => {tile.number = 3}, transitionInterval)
+                  return true
+                }
+                break
+              default:
+                setTimeout(() => {targetTile.number = targetTile.number * 2}, transitionInterval)
+                return true
+            }
+          } else {
+            return false
+          }
+        }
       )
-      console.log(targetTile);
       if (targetTile) {
-        setTimeout(() => {targetTile.number = targetTile.number * 2}, 1000)
+        console.log('targetTile.number:', targetTile.number);
         return true
       } else {
         return false
       }
     },
 
+    getNumberByPosition (x, y) {
+      const foundTile = this.tiles.find(tile => tile.x === x && tile.y === y)
+
+      return foundTile.number
+    },
+
+    canCombine (num1, num2) {
+      switch (num2) {
+        case 1:
+          if (num1 === num2 && num1 > 2) {
+            return true
+          }
+          break;
+        case 2:
+          if (num1 + num2 === 3) {
+            return true
+          }
+          break;
+          default:
+          return false
+
+      }
+    },
+
     moveColumn: function (colNum, direction) {
+
       const increment = direction === 'right' ? 1 : -1
-      this.tiles = this.tiles.map((tile, index) => {
-        if (tile.x === colNum && this.isEmpty(tile.x + increment, tile.y)) {
-          return Object.assign({}, tile, {x: tile.x + increment})
-        } else if (tile.x === colNum && this.isSameNumber(tile.x + increment, tile.y, tile.number)) {
-          setTimeout(() => this.tiles.splice(index, 1), 1000)
-          return Object.assign({}, tile, {
-            x: tile.x + increment,
-            // number: tile.number * 2
-          })
-        } else {
-          return tile
+
+      const tilesInCol = this.tiles.filter(tile => tile.x === colNum)
+
+      tilesInCol.forEach(tile => {
+        const targetX = tile.x + increment
+        const targetY = tile.y
+        if (this.isEmpty(targetX, targetY)) {
+          tile.x = tile.x + increment
+        } else if (this.canCombine(tile.number, this.getNumberByPosition(targetX, targetY))){
+          this.combine(targetX, targetY, tile.number)
+          // TODO: FIX THIS!! this.combine() target? know which is the target and
+          //which is sliding onto the target. keep track of that. splice here
         }
       })
+
+      // this.tiles = this.tiles.map((tile, index) => {
+      //   if (tile.x === colNum && this.isEmpty(tile.x + increment, tile.y)) {
+      //     return Object.assign({}, tile, {x: tile.x + increment})
+      //   } else if (tile.x === colNum && this.combine(tile.x + increment, tile.y, tile.number)) {
+      //     setTimeout(() => this.tiles.splice(index, 1), transitionInterval)
+      //     return Object.assign({}, tile, {
+      //       x: tile.x + increment,
+      //       // number: tile.number * 2
+      //     })
+      //   } else {
+      //     return tile
+      //   }
+      // })
+
     },
 
     moveRow: function (rowNum, direction) {
@@ -109,8 +210,8 @@ export default {
       this.tiles = this.tiles.map((tile, index) => {
         if (tile.y === rowNum && this.isEmpty(tile.x, tile.y + increment)) {
           return Object.assign({}, tile, {y: tile.y + increment})
-        } else if ( tile.y === rowNum && this.isSameNumber(tile.x, tile.y + increment, tile.number)) {
-          setTimeout(() => this.tiles.splice(index, 1), 1000)
+        } else if ( tile.y === rowNum && this.combine(tile.x, tile.y + increment, tile.number)) {
+          setTimeout(() => this.tiles.splice(index, 1), transitionInterval)
           return Object.assign({}, tile, {
             y: tile.y + increment,
             // number: tile.number * 2
@@ -160,6 +261,6 @@ export default {
   font-style: bold;
   line-height: 50px;
   background-color: grey;
-  transition: 1s;
+  transition: 0ms;
 }
 </style>
