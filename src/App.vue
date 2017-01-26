@@ -1,5 +1,38 @@
 <template>
   <div id="app">
+    <!-- <div class="next-tile">Next:</div> -->
+
+    <div class="grid">
+
+      <div class="next-tile-container">
+        <div class="next-tile tile">
+          {{baseTileNumbers.slice(-1)[0]}}
+        </div>
+        Next
+      </div>
+
+      <div v-for="n in 6" class="row">
+        <div v-for="n in 6" class="cell"></div>
+      </div>
+
+      <div v-for="tile in tiles"
+            :key="tile.id"
+            v-bind:style="{
+              top: `${ tile.y * (86.90169943749474 + 10) + 6}px`,
+              left: `${ tile.x * (56 + 10) + 9}px`
+              }"
+            v-bind:class="
+              tile.number === 1 ? 'tile-one tile' :
+              tile.number === 2 ? 'tile-two tile' : 'tile' ">
+        {{tile.number}}
+      </div>
+
+      <div v-on:click="newGame" class="new-game-button">
+        New Game
+      </div>
+
+    </div>
+
     <div v-show="score" class="game-over-shroud">
       <div class="score">
         Your score is {{score}}
@@ -12,28 +45,6 @@
       </div>
     </div>
 
-    <div class="next-tile">
-      {{baseTileNumbers.slice(-1)[0]}}
-    </div>
-    <div class="grid">
-      <div v-for="n in 6" class="row">
-        <div v-for="n in 6" class="cell"></div>
-      </div>
-
-      <div v-for="tile in tiles"
-            :key="tile.id"
-            v-bind:style="{
-              top: `${ tile.y * (86.90169943749474 + 10) + 6}px`,
-              left: `${ tile.x * (56 + 10) + 9}px`
-              }"
-            class="tile">
-        {{tile.number}}
-      </div>
-
-    </div>
-    <div v-on:click="newGame" class="new-game-button">
-      New Game
-    </div>
   </div>
 </template>
 
@@ -387,9 +398,13 @@ export default {
 </script>
 
 <style>
-/** {
-  filter: invert(100%);
-}*/
+@import url('https://fonts.googleapis.com/css?family=Fira+Sans+Condensed');
+
+#app {
+  width: 400px;
+  font-family: 'Fira Sans Condensed', sans-serif;
+  display: block;
+}
 
 .row {
   display: flex;
@@ -399,11 +414,11 @@ export default {
   width: 56px;
   height: 86.90169943749474px;
   background-color: #bbd9d9;
-  border-radius: 7px;
+  border-radius: 5px;
   margin: 5px;
 }
 
-.row:first-child .cell, .row:nth-child(6) .cell, .cell:first-child, .cell:last-child {
+.row:nth-child(2) .cell, .row:nth-child(7) .cell, .cell:first-child, .cell:last-child {
   background-color: rgba(0,0,0,0);
 }
 
@@ -416,20 +431,40 @@ export default {
   width: 50px;
   height: 75.90169943749474px;
   border-bottom: 5px #ffcc66 solid;
-  border-radius: 5px;
+  border-radius: 7px;
   position: absolute;
   text-align: center;
-  font-size: 25px;
+  font-size: 35px;
   font-style: bold;
   line-height: 80.90169943749474px;
   background-color: white;
   transition: 500ms;
-  font-family: sans-serif;
+  font-family: 'Fira Sans Condensed', sans-serif;
+}
+
+.next-tile-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  position: absolute;
+  width: 100%;
+  height: 15%;
+}
+
+.next-tile {
+  /*top: 20px;
+  left: 193px;*/
+  height: 37.95px;
+  width: 25px;
+  font-size: 18px;
+  line-height: 37.95px;
+  position: relative;
 }
 
 .game-over-shroud {
-  width: 100%;
-  height: 100%;
+  width: 408px;
+  height: 590px;
   position: absolute;
   top: 0;
   left: 0;
@@ -438,5 +473,27 @@ export default {
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
+  color: white;
+  font-size: 30px;
 }
+
+.tile-one {
+  background-color: #72caf2;
+  color: white;
+}
+
+.tile-two {
+  background-color: #f16780;
+  color: white;
+}
+
+.new-game-button {
+  text-align: center;
+  font-size: 24px;
+  background-color: #777e8c;
+  border-bottom: 5px #494766 solid;
+  border-radius: 5px;
+  width: 30%;
+}
+
 </style>
