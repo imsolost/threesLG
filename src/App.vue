@@ -11,6 +11,18 @@
             class="tile">
         {{tile.number}}
       </div>
+
+      <div v-show="score" class="game-over-shroud">
+        <div class="score">
+          Your score is {{score}}
+        </div>
+        <div class="game-over-text">
+          Game Over
+        </div>
+        <div class="new-game">
+          New Game
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -22,43 +34,101 @@ const transitionInterval = 0
 export default {
   name: 'app',
   created: function () {
+    this.newGame()
     window.addEventListener('keydown', this.move)
   },
   data: function () {
     return {
-      tiles: [
-               {x: 1, y: 2, number: 1},
-               {x: 2, y: 2, number: 2},
-               {x: 3, y: 2, number: 3}
-             ]
+      tiles: [],
+      score: 0
     }
   },
   methods: {
+    newGame() {
+      this.initializeTiles()
+      this.score = 0
+    },
+
+    initializeTiles() {
+      this.tiles = []
+
+      let tileNumbers = [1, 1, 2, 2, 3, 3]
+
+      for(let i = 0; i < 3; i++) {
+        tileNumbers.push(Math.floor(Math.random() * 3 + 1))
+      }
+
+      tileNumbers.forEach(number => {
+        let x, y
+
+        do {
+          x = Math.floor(Math.random() * 4 + 1)
+          y = Math.floor(Math.random() * 4 + 1)
+        } while (this.tiles.find(tile => tile.x === x && tile.y === y))
+
+        this.tiles.push({x, y, number})
+      })
+    },
+
+    gameOverCheck () {
+      const availableCols = []
+      const availableRows = []
+
+      for (let colNum = 1; colNum <= 4; colNum++) {
+        if (this.willThereBeSpaceInCol(colNum)) {
+          availableCols.push(colNum)
+        }
+      }
+
+      for (let rowNum = 1; rowNum <= 4; rowNum++) {
+        if (this.willThereBeSpaceInRow(rowNum)) {
+          availableRows.push(rowNum)
+        }
+      }
+
+      if (availableRows.length !== 0 || availableCols.length !== 0) return
+      else if (availableRows.length === 0 && availableCols.length === 0) {
+        // setTimeout(() => alert('Game Over'), 200)
+
+        this.score = this.calculateScore()
+      }
+    },
+
+    calculateScore () {
+      let score = 0
+      this.tiles.forEach(tile => {
+        if (tile.number > 2) {
+          score += 3 ** (Math.log2(tile.number / 3) + 1)
+        }
+      })
+      return score
+    },
+
     insertTile (side) {
       let targetRow, targetCol
       switch (side) {
         case 'left':
           targetRow = this.randomAvailbleRow()
           if (targetRow) {
-            this.tiles.push({x: 0, y: targetRow, number: 1})
+            this.tiles.push({x: 0, y: targetRow, number: this.pickRandomTileNumber()})
           }
           break;
         case 'right':
           targetRow = this.randomAvailbleRow()
           if (targetRow) {
-            this.tiles.push({x: 5, y: targetRow, number: 2})
+            this.tiles.push({x: 5, y: targetRow, number: this.pickRandomTileNumber()})
           }
           break;
         case 'top':
           targetCol = this.randomAvailbleCol()
           if (targetCol) {
-            this.tiles.push({x: targetCol, y: 0, number: 2})
+            this.tiles.push({x: targetCol, y: 0, number: this.pickRandomTileNumber()})
           }
           break;
         case 'bottom':
           targetCol = this.randomAvailbleCol()
           if (targetCol) {
-            this.tiles.push({x: targetCol, y: 5, number: 1})
+            this.tiles.push({x: targetCol, y: 5, number: this.pickRandomTileNumber()})
           }
           break;
         default:
@@ -66,9 +136,16 @@ export default {
       }
     },
 
+    pickRandomTileNumber() {
+      const insertableTileNumbers = [1,1,2,2,3]
+      const randomIndex = Math.floor(Math.random() * insertableTileNumbers.length)
+
+      return insertableTileNumbers[randomIndex]
+    },
+
     randomAvailbleRow() {
       const availableRows = []
-      for (var rowNum = 1; rowNum <= 4; rowNum++) {
+      for (let rowNum = 1; rowNum <= 4; rowNum++) {
         if (this.willThereBeSpaceInRow(rowNum)) {
           availableRows.push(rowNum)
         }
@@ -93,8 +170,8 @@ export default {
       if (isEmptySpace) return true
 
       for (let colNum = 1; colNum <= 3; colNum++) {
-        const num1 = rowTiles[colNum]
-        const num2 = rowTiles[colNum + 1]
+        const num1 = rowTiles[colNum].number
+        const num2 = rowTiles[colNum + 1].number
 
         if ((num1 === num2 && num1 > 2) || (num1 + num2 === 3)) {
           return true
@@ -106,7 +183,7 @@ export default {
 
     randomAvailbleCol() {
       const availableCols = []
-      for (var colNum = 1; colNum <= 4; colNum++) {
+      for (let colNum = 1; colNum <= 4; colNum++) {
         if (this.willThereBeSpaceInCol(colNum)) {
           availableCols.push(colNum)
         }
@@ -131,8 +208,8 @@ export default {
       if (isEmptySpace) return true
 
       for (let rowNum = 1; rowNum <= 3; rowNum++) {
-        const num1 = colTiles[rowNum]
-        const num2 = colTiles[rowNum + 1]
+        const num1 = colTiles[rowNum].number
+        const num2 = colTiles[rowNum + 1].number
 
         if ((num1 === num2 && num1 > 2) || (num1 + num2 === 3)) {
           return true
@@ -143,8 +220,8 @@ export default {
     },
 
     move: function (event) {
-      // console.log('tiles:', this.tiles);
-      if (event.key === 'ArrowRight') {
+      console.log('event', event)
+      if (event.code === 'ArrowRight') {
         event.preventDefault()
 
         this.insertTile('left')
@@ -154,9 +231,10 @@ export default {
           this.moveColumn(2, 'right')
           this.moveColumn(1, 'right')
           this.moveColumn(0, 'right')
+          this.gameOverCheck()
         }, 5)
 
-      } else if (event.key === 'ArrowLeft') {
+      } else if (event.code === 'ArrowLeft') {
         event.preventDefault()
 
         this.insertTile('right')
@@ -165,9 +243,10 @@ export default {
           this.moveColumn(3, 'left')
           this.moveColumn(4, 'left')
           this.moveColumn(5, 'left')
+          this.gameOverCheck()
         }, 5)
 
-      } else if (event.key === 'ArrowUp') {
+      } else if (event.code === 'ArrowUp') {
         event.preventDefault()
 
         this.insertTile('bottom')
@@ -176,9 +255,10 @@ export default {
           this.moveRow(3, 'up')
           this.moveRow(4, 'up')
           this.moveRow(5, 'up')
+          this.gameOverCheck()
         }, 5)
 
-      } else if (event.key === 'ArrowDown') {
+      } else if (event.code === 'ArrowDown') {
         event.preventDefault()
 
         this.insertTile('top')
@@ -187,7 +267,12 @@ export default {
           this.moveRow(2, 'down')
           this.moveRow(1, 'down')
           this.moveRow(0, 'down')
+          this.gameOverCheck()
         }, 5)
+      } else if (event.code === 'Space') {
+        event.preventDefault()
+
+        this.newGame()
       }
     },
 
@@ -239,6 +324,7 @@ export default {
     }
   }
 }
+
 </script>
 
 <style>
@@ -274,5 +360,18 @@ export default {
   line-height: 50px;
   background-color: grey;
   transition: 0ms;
+}
+
+.game-over-shroud {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(127, 127, 127, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
 }
 </style>
