@@ -6,7 +6,7 @@
       </div>
 
       <div v-for="tile in tiles"
-            v-bind:id="tile.id"
+            :key="tile.id"
             v-bind:style="{top: `${ tile.y * 60}px`, left: `${ tile.x * 60}px`}"
             class="tile">
         {{tile.number}}
@@ -32,7 +32,7 @@
 
 <script>
 
-const transitionInterval = 0
+const transitionInterval = 400
 
 export default {
   name: 'app',
@@ -43,7 +43,8 @@ export default {
   data: function () {
     return {
       tiles: [],
-      score: 0
+      score: 0,
+      locked: false
     }
   },
   methods: {
@@ -69,7 +70,7 @@ export default {
           y = Math.floor(Math.random() * 4 + 1)
         } while (this.tiles.find(tile => tile.x === x && tile.y === y))
 
-        this.tiles.push({x, y, number})
+        this.tiles.push({x, y, number, id: Math.random()})
       })
     },
 
@@ -111,25 +112,25 @@ export default {
         case 'left':
           targetRow = this.randomAvailbleRow()
           if (targetRow) {
-            this.tiles.push({x: 0, y: targetRow, number: this.pickRandomTileNumber()})
+            this.tiles.push({x: 0, y: targetRow, number: this.pickRandomTileNumber(), id: Math.random()})
           }
           break;
         case 'right':
           targetRow = this.randomAvailbleRow()
           if (targetRow) {
-            this.tiles.push({x: 5, y: targetRow, number: this.pickRandomTileNumber()})
+            this.tiles.push({x: 5, y: targetRow, number: this.pickRandomTileNumber(), id: Math.random()})
           }
           break;
         case 'top':
           targetCol = this.randomAvailbleCol()
           if (targetCol) {
-            this.tiles.push({x: targetCol, y: 0, number: this.pickRandomTileNumber()})
+            this.tiles.push({x: targetCol, y: 0, number: this.pickRandomTileNumber(), id: Math.random()})
           }
           break;
         case 'bottom':
           targetCol = this.randomAvailbleCol()
           if (targetCol) {
-            this.tiles.push({x: targetCol, y: 5, number: this.pickRandomTileNumber()})
+            this.tiles.push({x: targetCol, y: 5, number: this.pickRandomTileNumber(), id: Math.random()})
           }
           break;
         default:
@@ -221,6 +222,11 @@ export default {
     },
 
     move: function (event) {
+      if (this.locked) return
+
+      this.locked = true
+      setTimeout(() => this.locked = false, transitionInterval)
+
       if (event.code === 'ArrowRight') {
         event.preventDefault()
 
@@ -276,16 +282,24 @@ export default {
       }
     },
 
-    combineIfPossible (movingTile, targetTile) {
+    combineIfPossible (movingTile, targetTile, increment, direction) {
       const num1 = movingTile.number
       const num2 = targetTile.number
 
       if ((num1 === num2 && num1 > 2) || (num1 + num2 === 3)) {
-        targetTile.number = num1 + num2
-        // setTimeout(() =>
-          this.tiles.splice(this.tiles.indexOf(movingTile), 1)
-        //   transitionInterval
-        // )
+
+        if (direction === 'horizontal') {
+          movingTile.x = movingTile.x + increment
+        } else if (direction === 'vertical') {
+          movingTile.y = movingTile.y + increment
+        }
+
+        setTimeout(() => {
+            this.tiles.splice(this.tiles.indexOf(movingTile), 1)
+            targetTile.number = num1 + num2
+          },
+          transitionInterval
+        )
       }
     },
 
@@ -303,7 +317,7 @@ export default {
         if (!targetTile) {
           tile.x = tile.x + increment
         } else {
-          this.combineIfPossible(tile, targetTile)
+          this.combineIfPossible(tile, targetTile, increment, 'horizontal')
         }
       })
     },
@@ -318,7 +332,7 @@ export default {
         if (!targetTile) {
           tile.y = tile.y + increment
         } else {
-          this.combineIfPossible(tile, targetTile)
+          this.combineIfPossible(tile, targetTile, increment, 'vertical')
         }
       })
     }
@@ -359,7 +373,7 @@ export default {
   font-style: bold;
   line-height: 50px;
   background-color: grey;
-  transition: 0ms;
+  transition: 500ms;
 }
 
 .game-over-shroud {
