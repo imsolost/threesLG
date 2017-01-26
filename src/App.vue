@@ -1,5 +1,17 @@
 <template>
   <div id="app">
+    <div v-show="score" class="game-over-shroud">
+      <div class="score">
+        Your score is {{score}}
+      </div>
+      <div class="game-over-text">
+        Game Over
+      </div>
+      <div v-on:click="newGame" class="new-game-shroud-button">
+        New Game
+      </div>
+    </div>
+
     <div class="next-tile">
       {{baseTileNumbers.slice(-1)[0]}}
     </div>
@@ -10,22 +22,14 @@
 
       <div v-for="tile in tiles"
             :key="tile.id"
-            v-bind:style="{top: `${ tile.y * 60}px`, left: `${ tile.x * 60}px`}"
+            v-bind:style="{
+              top: `${ tile.y * (86.90169943749474 + 10) + 6}px`,
+              left: `${ tile.x * (56 + 10) + 9}px`
+              }"
             class="tile">
         {{tile.number}}
       </div>
 
-      <div v-show="score" class="game-over-shroud">
-        <div class="score">
-          Your score is {{score}}
-        </div>
-        <div class="game-over-text">
-          Game Over
-        </div>
-        <div v-on:click="newGame" class="new-game-shroud-button">
-          New Game
-        </div>
-      </div>
     </div>
     <div v-on:click="newGame" class="new-game-button">
       New Game
@@ -392,29 +396,35 @@ export default {
 }
 
 .cell {
-  width: 50px;
-  height: 50px;
-  border: 5px red solid;
+  width: 56px;
+  height: 86.90169943749474px;
+  background-color: #bbd9d9;
+  border-radius: 7px;
+  margin: 5px;
+}
+
+.row:first-child .cell, .row:nth-child(6) .cell, .cell:first-child, .cell:last-child {
+  background-color: rgba(0,0,0,0);
 }
 
 .grid {
   position: relative;
-  background-color: white;
+  background-color: #cfe7e0;
 }
 
 .tile {
   width: 50px;
-  height: 50px;
-  border: 5px blue solid;
-  border-radius: 10px;
-  box-shadow: inset 0 0 10px black;
+  height: 75.90169943749474px;
+  border-bottom: 5px #ffcc66 solid;
+  border-radius: 5px;
   position: absolute;
   text-align: center;
   font-size: 25px;
   font-style: bold;
-  line-height: 50px;
-  background-color: grey;
+  line-height: 80.90169943749474px;
+  background-color: white;
   transition: 500ms;
+  font-family: sans-serif;
 }
 
 .game-over-shroud {
