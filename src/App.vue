@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+    <div class="next-tile">
+      {{baseTileNumbers.slice(-1)[0]}}
+    </div>
     <div class="grid">
       <div v-for="n in 6" class="row">
         <div v-for="n in 6" class="cell"></div>
@@ -44,7 +47,9 @@ export default {
     return {
       tiles: [],
       score: 0,
-      locked: false
+      locked: false,
+      baseTileNumbers: [],
+      bigTileNumbers: []
     }
   },
   methods: {
@@ -56,11 +61,9 @@ export default {
     initializeTiles() {
       this.tiles = []
 
-      let tileNumbers = [1, 1, 2, 2, 3, 3]
+      this.resetBaseTileNumbers()
 
-      for(let i = 0; i < 3; i++) {
-        tileNumbers.push(Math.floor(Math.random() * 3 + 1))
-      }
+      const tileNumbers = this.baseTileNumbers.splice(3, 9)
 
       tileNumbers.forEach(number => {
         let x, y
@@ -138,11 +141,49 @@ export default {
       }
     },
 
-    pickRandomTileNumber() {
-      const insertableTileNumbers = [1,1,2,2,3]
-      const randomIndex = Math.floor(Math.random() * insertableTileNumbers.length)
+    highestNumber() {
+      return this.tiles.reduce((accumulator, tile) => {
+        return tile.number > accumulator ? tile.number : accumulator
+      }, 0)
+    },
 
-      return insertableTileNumbers[randomIndex]
+    pickRandomTileNumber() {
+      let randomTileNumber = this.baseTileNumbers.pop()
+
+      if (this.baseTileNumbers.length === 0) {
+        this.resetBaseTileNumbers()
+      }
+
+      const largestNumber = this.highestNumber()
+
+      if (largestNumber >= 48) {
+
+        for (let number = largestNumber / 8; number >= 6 ; number /= 2) {
+          this.bigTileNumbers.push(number)
+        }
+
+        if (Math.random() < 1 / 21) {
+          const randomIndex = Math.floor(Math.random() * this.bigTileNumbers.length)
+
+          this.baseTileNumbers.push(this.bigTileNumbers[randomIndex])
+        }
+
+      }
+
+      return randomTileNumber
+    },
+
+    resetBaseTileNumbers() {
+      const unsortedNumbers = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3]
+      let randomIndex, randomNumber
+
+      this.baseTileNumbers = []
+
+      while (unsortedNumbers.length > 0) {
+        randomIndex = Math.floor(Math.random() * unsortedNumbers.length)
+        randomNumber = unsortedNumbers.splice(randomIndex, 1)[0]
+        this.baseTileNumbers.push(randomNumber)
+      }
     },
 
     randomAvailbleRow() {
