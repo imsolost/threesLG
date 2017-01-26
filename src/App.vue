@@ -19,10 +19,13 @@
         <div class="game-over-text">
           Game Over
         </div>
-        <div class="new-game">
+        <div v-on:click="newGame" class="new-game-shroud-button">
           New Game
         </div>
       </div>
+    </div>
+    <div v-on:click="newGame" class="new-game-button">
+      New Game
     </div>
   </div>
 </template>
@@ -88,8 +91,6 @@ export default {
 
       if (availableRows.length !== 0 || availableCols.length !== 0) return
       else if (availableRows.length === 0 && availableCols.length === 0) {
-        // setTimeout(() => alert('Game Over'), 200)
-
         this.score = this.calculateScore()
       }
     },
@@ -220,7 +221,6 @@ export default {
     },
 
     move: function (event) {
-      console.log('event', event)
       if (event.code === 'ArrowRight') {
         event.preventDefault()
 
