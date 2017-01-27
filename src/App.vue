@@ -1,38 +1,62 @@
 <template>
   <div id="app">
-    <div class="grid">
-      <div v-for="n in 6" class="row">
-        <div v-for="n in 6" class="cell"></div>
+
+    <div class="next-tile-cell">
+      <div v-bind:class="baseTileNumbers.slice(-1)[0] === 1
+        ? 'tile-one tile next-tile'
+          : baseTileNumbers.slice(-1)[0] === 2
+          ? 'tile-two tile next-tile'
+            : 'tile next-tile' ">
+        <!-- {{baseTileNumbers.slice(-1)[0]}} -->
+      </div>
+      <div>
+        Next
+      </div>
+    </div>
+
+
+    <div class="tile-grid">
+      <div v-for="n in 4" class="row">
+        <div v-for="n in 4" class="cell"></div>
       </div>
 
       <div v-for="tile in tiles"
-            v-bind:id="tile.id"
-            v-bind:style="{top: `${ tile.y * 60}px`, left: `${ tile.x * 60}px`}"
-            class="tile">
+            :key="tile.id"
+            v-bind:style="{
+              top: `${ (tile.y - 1) * (86.90169943749474 + 10) + 10}px`,
+              left: `${ (tile.x - 1) * (56 + 10) + 13}px`
+              }"
+            v-bind:class="
+              tile.number === 1 ? 'tile-one tile' :
+              tile.number === 2 ? 'tile-two tile' : 'tile' ">
         {{tile.number}}
       </div>
-
-      <div v-show="score" class="game-over-shroud">
-        <div class="score">
-          Your score is {{score}}
-        </div>
-        <div class="game-over-text">
-          Game Over
-        </div>
-        <div v-on:click="newGame" class="new-game-shroud-button">
-          New Game
-        </div>
-      </div>
     </div>
+
     <div v-on:click="newGame" class="new-game-button">
       New Game
     </div>
+
+    <div v-show="score" class="game-over-shroud">
+
+      <div class="game-over-text">
+        Game Over
+      </div>
+      <div class="score">
+        Score: {{score}}
+      </div>
+
+      <div v-on:click="newGame" class="new-game-shroud-button">
+        Try Again
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script>
 
-const transitionInterval = 0
+const transitionInterval = 250
 
 export default {
   name: 'app',
@@ -43,7 +67,10 @@ export default {
   data: function () {
     return {
       tiles: [],
-      score: 0
+      score: 0,
+      locked: false,
+      baseTileNumbers: [],
+      bigTileNumbers: []
     }
   },
   methods: {
@@ -55,11 +82,9 @@ export default {
     initializeTiles() {
       this.tiles = []
 
-      let tileNumbers = [1, 1, 2, 2, 3, 3]
+      this.resetBaseTileNumbers()
 
-      for(let i = 0; i < 3; i++) {
-        tileNumbers.push(Math.floor(Math.random() * 3 + 1))
-      }
+      const tileNumbers = this.baseTileNumbers.splice(3, 9)
 
       tileNumbers.forEach(number => {
         let x, y
@@ -69,7 +94,7 @@ export default {
           y = Math.floor(Math.random() * 4 + 1)
         } while (this.tiles.find(tile => tile.x === x && tile.y === y))
 
-        this.tiles.push({x, y, number})
+        this.tiles.push({x, y, number, id: Math.random()})
       })
     },
 
@@ -90,6 +115,7 @@ export default {
       }
 
       if (availableRows.length !== 0 || availableCols.length !== 0) return
+
       else if (availableRows.length === 0 && availableCols.length === 0) {
         this.score = this.calculateScore()
       }
@@ -111,25 +137,25 @@ export default {
         case 'left':
           targetRow = this.randomAvailbleRow()
           if (targetRow) {
-            this.tiles.push({x: 0, y: targetRow, number: this.pickRandomTileNumber()})
+            this.tiles.push({x: 0, y: targetRow, number: this.pickRandomTileNumber(), id: Math.random()})
           }
           break;
         case 'right':
           targetRow = this.randomAvailbleRow()
           if (targetRow) {
-            this.tiles.push({x: 5, y: targetRow, number: this.pickRandomTileNumber()})
+            this.tiles.push({x: 5, y: targetRow, number: this.pickRandomTileNumber(), id: Math.random()})
           }
           break;
         case 'top':
           targetCol = this.randomAvailbleCol()
           if (targetCol) {
-            this.tiles.push({x: targetCol, y: 0, number: this.pickRandomTileNumber()})
+            this.tiles.push({x: targetCol, y: 0, number: this.pickRandomTileNumber(), id: Math.random()})
           }
           break;
         case 'bottom':
           targetCol = this.randomAvailbleCol()
           if (targetCol) {
-            this.tiles.push({x: targetCol, y: 5, number: this.pickRandomTileNumber()})
+            this.tiles.push({x: targetCol, y: 5, number: this.pickRandomTileNumber(), id: Math.random()})
           }
           break;
         default:
@@ -137,11 +163,49 @@ export default {
       }
     },
 
-    pickRandomTileNumber() {
-      const insertableTileNumbers = [1,1,2,2,3]
-      const randomIndex = Math.floor(Math.random() * insertableTileNumbers.length)
+    highestNumber() {
+      return this.tiles.reduce((accumulator, tile) => {
+        return tile.number > accumulator ? tile.number : accumulator
+      }, 0)
+    },
 
-      return insertableTileNumbers[randomIndex]
+    pickRandomTileNumber() {
+      let randomTileNumber = this.baseTileNumbers.pop()
+
+      if (this.baseTileNumbers.length === 0) {
+        this.resetBaseTileNumbers()
+      }
+
+      const largestNumber = this.highestNumber()
+
+      if (largestNumber >= 48) {
+
+        for (let number = largestNumber / 8; number >= 6 ; number /= 2) {
+          this.bigTileNumbers.push(number)
+        }
+
+        if (Math.random() < 1 / 21) {
+          const randomIndex = Math.floor(Math.random() * this.bigTileNumbers.length)
+
+          this.baseTileNumbers.push(this.bigTileNumbers[randomIndex])
+        }
+
+      }
+
+      return randomTileNumber
+    },
+
+    resetBaseTileNumbers() {
+      const unsortedNumbers = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3]
+      let randomIndex, randomNumber
+
+      this.baseTileNumbers = []
+
+      while (unsortedNumbers.length > 0) {
+        randomIndex = Math.floor(Math.random() * unsortedNumbers.length)
+        randomNumber = unsortedNumbers.splice(randomIndex, 1)[0]
+        this.baseTileNumbers.push(randomNumber)
+      }
     },
 
     randomAvailbleRow() {
@@ -221,6 +285,11 @@ export default {
     },
 
     move: function (event) {
+      if (this.locked) return
+
+      this.locked = true
+      setTimeout(() => this.locked = false, transitionInterval)
+
       if (event.code === 'ArrowRight') {
         event.preventDefault()
 
@@ -231,7 +300,7 @@ export default {
           this.moveColumn(2, 'right')
           this.moveColumn(1, 'right')
           this.moveColumn(0, 'right')
-          this.gameOverCheck()
+          setTimeout(() => this.gameOverCheck(), transitionInterval + 5)
         }, 5)
 
       } else if (event.code === 'ArrowLeft') {
@@ -243,7 +312,7 @@ export default {
           this.moveColumn(3, 'left')
           this.moveColumn(4, 'left')
           this.moveColumn(5, 'left')
-          this.gameOverCheck()
+          setTimeout(() => this.gameOverCheck(), transitionInterval + 5)
         }, 5)
 
       } else if (event.code === 'ArrowUp') {
@@ -255,7 +324,7 @@ export default {
           this.moveRow(3, 'up')
           this.moveRow(4, 'up')
           this.moveRow(5, 'up')
-          this.gameOverCheck()
+          setTimeout(() => this.gameOverCheck(), transitionInterval + 5)
         }, 5)
 
       } else if (event.code === 'ArrowDown') {
@@ -267,7 +336,7 @@ export default {
           this.moveRow(2, 'down')
           this.moveRow(1, 'down')
           this.moveRow(0, 'down')
-          this.gameOverCheck()
+          setTimeout(() => this.gameOverCheck(), transitionInterval + 5)
         }, 5)
       } else if (event.code === 'Space') {
         event.preventDefault()
@@ -276,16 +345,24 @@ export default {
       }
     },
 
-    combineIfPossible (movingTile, targetTile) {
+    combineIfPossible (movingTile, targetTile, increment, direction) {
       const num1 = movingTile.number
       const num2 = targetTile.number
 
       if ((num1 === num2 && num1 > 2) || (num1 + num2 === 3)) {
-        targetTile.number = num1 + num2
-        // setTimeout(() =>
-          this.tiles.splice(this.tiles.indexOf(movingTile), 1)
-        //   transitionInterval
-        // )
+
+        if (direction === 'horizontal') {
+          movingTile.x = movingTile.x + increment
+        } else if (direction === 'vertical') {
+          movingTile.y = movingTile.y + increment
+        }
+
+        setTimeout(() => {
+            this.tiles.splice(this.tiles.indexOf(movingTile), 1)
+            targetTile.number = num1 + num2
+          },
+          transitionInterval
+        )
       }
     },
 
@@ -303,7 +380,7 @@ export default {
         if (!targetTile) {
           tile.x = tile.x + increment
         } else {
-          this.combineIfPossible(tile, targetTile)
+          this.combineIfPossible(tile, targetTile, increment, 'horizontal')
         }
       })
     },
@@ -318,7 +395,7 @@ export default {
         if (!targetTile) {
           tile.y = tile.y + increment
         } else {
-          this.combineIfPossible(tile, targetTile)
+          this.combineIfPossible(tile, targetTile, increment, 'vertical')
         }
       })
     }
@@ -328,38 +405,74 @@ export default {
 </script>
 
 <style>
-/** {
-  filter: invert(100%);
-}*/
+@import url('https://fonts.googleapis.com/css?family=Fira+Sans+Condensed');
+
+#app {
+  font-family: 'Fira Sans Condensed', sans-serif;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 
 .row {
   display: flex;
 }
 
 .cell {
-  width: 50px;
-  height: 50px;
-  border: 5px red solid;
+  width: 56px;
+  height: 86.90169943749474px;
+  background-color: #bbd9d9;
+  border-radius: 5px;
+  margin: 5px;
 }
 
-.grid {
+.tile-grid {
   position: relative;
-  background-color: white;
+  margin-bottom: 21px;
+  background-color: #cfe7e0;
+  border-radius: 15px;
+  padding: 5px;
+  border-bottom: 7px #bbd9d9 solid;
 }
 
 .tile {
   width: 50px;
-  height: 50px;
-  border: 5px blue solid;
-  border-radius: 10px;
-  box-shadow: inset 0 0 10px black;
+  height: 75.90169943749474px;
+  border-bottom: 5px #ffcc66 solid;
+  border-radius: 7px;
   position: absolute;
   text-align: center;
-  font-size: 25px;
+  font-size: 35px;
   font-style: bold;
-  line-height: 50px;
-  background-color: grey;
-  transition: 0ms;
+  line-height: 80.90169943749474px;
+  background-color: white;
+  transition: 250ms;
+  font-family: 'Fira Sans Condensed', sans-serif;
+}
+
+.next-tile {
+  height: 36.45px;
+  width: 25px;
+  font-size: 18px;
+  line-height: 37.95px;
+  position: relative;
+  margin-bottom: 5px;
+  border-bottom-width: 4px;
+  border-radius: 4px;
+}
+
+.next-tile-cell {
+  padding: 5px;
+  background-color: #cfe7e0;
+  border-radius: 5px;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .game-over-shroud {
@@ -368,10 +481,53 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  background-color: rgba(127, 127, 127, 0.7);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
+  color: #ddd;
+  font-size: 30px;
+  line-height: 60px;
 }
+
+.tile-one {
+  background-color: #72caf2;
+  color: white;
+  border-color: #6ba6da;
+}
+
+.tile-two {
+  background-color: #f16780;
+  color: white;
+  border-color: #cd537c;
+}
+
+.new-game-button {
+  text-align: center;
+  font-size: 20px;
+  background-color: #777e8c;
+  border-bottom: 5px #494766 solid;
+  border-radius: 5px;
+  color: white;
+  margin-bottom: 25px;
+  padding: 4px 15px;
+}
+
+.new-game-button:hover, .new-game-shroud-button {
+  cursor: pointer;
+}
+
+.new-game-shroud-button {
+  text-align: center;
+  background-color: hsl(220, 8%, 30%);
+  border-radius: 5px;
+  border-bottom: 5px hsl(220, 8%, 12%) solid;
+  position: absolute;
+  bottom: 22px;
+  font-size: 20px;
+  line-height: 30px;
+  padding: 4px 25px;
+}
+
 </style>
