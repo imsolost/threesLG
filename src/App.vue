@@ -1,58 +1,57 @@
 <template>
-  <!-- <div id="app"> -->
-    <!-- <div class="next-tile">Next:</div> -->
+  <div id="app">
 
-    <div id="app">
-
+    <div class="next-tile-cell">
       <div v-bind:class="baseTileNumbers.slice(-1)[0] === 1
         ? 'tile-one tile next-tile'
           : baseTileNumbers.slice(-1)[0] === 2
           ? 'tile-two tile next-tile'
             : 'tile next-tile' ">
-        {{baseTileNumbers.slice(-1)[0]}}
+        <!-- {{baseTileNumbers.slice(-1)[0]}} -->
       </div>
-      <div class="next-label">
+      <div>
         Next
       </div>
-
-      <div class="tile-grid">
-        <div v-for="n in 4" class="row">
-          <div v-for="n in 4" class="cell"></div>
-        </div>
-
-        <div v-for="tile in tiles"
-              :key="tile.id"
-              v-bind:style="{
-                top: `${ (tile.y - 1) * (86.90169943749474 + 10) + 5}px`,
-                left: `${ (tile.x - 1) * (56 + 10) + 8}px`
-                }"
-              v-bind:class="
-                tile.number === 1 ? 'tile-one tile' :
-                tile.number === 2 ? 'tile-two tile' : 'tile' ">
-          {{tile.number}}
-        </div>
-      </div>
-
-      <div v-on:click="newGame" class="new-game-button">
-        New Game
-      </div>
-
-      <div v-show="score" class="game-over-shroud">
-
-        <div class="game-over-text">
-          Game Over
-        </div>
-        <div class="score">
-          Score: {{score}}
-        </div>
-
-        <div v-on:click="newGame" class="new-game-shroud-button">
-          Try Again
-        </div>
-      </div>
-
     </div>
-  <!-- </div> -->
+
+
+    <div class="tile-grid">
+      <div v-for="n in 4" class="row">
+        <div v-for="n in 4" class="cell"></div>
+      </div>
+
+      <div v-for="tile in tiles"
+            :key="tile.id"
+            v-bind:style="{
+              top: `${ (tile.y - 1) * (86.90169943749474 + 10) + 10}px`,
+              left: `${ (tile.x - 1) * (56 + 10) + 13}px`
+              }"
+            v-bind:class="
+              tile.number === 1 ? 'tile-one tile' :
+              tile.number === 2 ? 'tile-two tile' : 'tile' ">
+        {{tile.number}}
+      </div>
+    </div>
+
+    <div v-on:click="newGame" class="new-game-button">
+      New Game
+    </div>
+
+    <div v-show="score" class="game-over-shroud">
+
+      <div class="game-over-text">
+        Game Over
+      </div>
+      <div class="score">
+        Score: {{score}}
+      </div>
+
+      <div v-on:click="newGame" class="new-game-shroud-button">
+        Try Again
+      </div>
+    </div>
+
+  </div>
 </template>
 
 <script>
@@ -116,6 +115,7 @@ export default {
       }
 
       if (availableRows.length !== 0 || availableCols.length !== 0) return
+
       else if (availableRows.length === 0 && availableCols.length === 0) {
         this.score = this.calculateScore()
       }
@@ -300,7 +300,7 @@ export default {
           this.moveColumn(2, 'right')
           this.moveColumn(1, 'right')
           this.moveColumn(0, 'right')
-          this.gameOverCheck()
+          setTimeout(() => this.gameOverCheck(), transitionInterval + 5)
         }, 5)
 
       } else if (event.code === 'ArrowLeft') {
@@ -312,7 +312,7 @@ export default {
           this.moveColumn(3, 'left')
           this.moveColumn(4, 'left')
           this.moveColumn(5, 'left')
-          this.gameOverCheck()
+          setTimeout(() => this.gameOverCheck(), transitionInterval + 5)
         }, 5)
 
       } else if (event.code === 'ArrowUp') {
@@ -324,7 +324,7 @@ export default {
           this.moveRow(3, 'up')
           this.moveRow(4, 'up')
           this.moveRow(5, 'up')
-          this.gameOverCheck()
+          setTimeout(() => this.gameOverCheck(), transitionInterval + 5)
         }, 5)
 
       } else if (event.code === 'ArrowDown') {
@@ -336,7 +336,7 @@ export default {
           this.moveRow(2, 'down')
           this.moveRow(1, 'down')
           this.moveRow(0, 'down')
-          this.gameOverCheck()
+          setTimeout(() => this.gameOverCheck(), transitionInterval + 5)
         }, 5)
       } else if (event.code === 'Space') {
         event.preventDefault()
@@ -408,10 +408,8 @@ export default {
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans+Condensed');
 
 #app {
-  /*width: 400px;*/
   font-family: 'Fira Sans Condensed', sans-serif;
   position: relative;
-  background-color: #cfe7e0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -433,6 +431,10 @@ export default {
 .tile-grid {
   position: relative;
   margin-bottom: 21px;
+  background-color: #cfe7e0;
+  border-radius: 15px;
+  padding: 5px;
+  border-bottom: 7px #bbd9d9 solid;
 }
 
 .tile {
@@ -450,20 +452,27 @@ export default {
   font-family: 'Fira Sans Condensed', sans-serif;
 }
 
-.next-label {
-  margin-bottom: 10px;
-}
-
 .next-tile {
-  /*top: 20px;
-  left: 193px;*/
-  height: 37.95px;
+  height: 36.45px;
   width: 25px;
   font-size: 18px;
   line-height: 37.95px;
   position: relative;
-  margin-top: 25px;
   margin-bottom: 5px;
+  border-bottom-width: 4px;
+  border-radius: 4px;
+}
+
+.next-tile-cell {
+  padding: 5px;
+  background-color: #cfe7e0;
+  border-radius: 5px;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .game-over-shroud {
@@ -472,7 +481,6 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  /*background-color: rgba(127, 127, 127, 0.7);*/
   background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
