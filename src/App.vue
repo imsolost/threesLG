@@ -1,56 +1,63 @@
 <template>
-  <div id="app">
+  <!-- <div id="app"> -->
     <!-- <div class="next-tile">Next:</div> -->
 
-    <div class="grid">
+    <div id="app">
 
-      <div class="next-tile-container">
-        <div class="next-tile tile">
-          {{baseTileNumbers.slice(-1)[0]}}
-        </div>
+      <div v-bind:class="baseTileNumbers.slice(-1)[0] === 1
+        ? 'tile-one tile next-tile'
+          : baseTileNumbers.slice(-1)[0] === 2
+          ? 'tile-two tile next-tile'
+            : 'tile next-tile' ">
+        {{baseTileNumbers.slice(-1)[0]}}
+      </div>
+      <div class="next-label">
         Next
       </div>
 
-      <div v-for="n in 6" class="row">
-        <div v-for="n in 6" class="cell"></div>
-      </div>
+      <div class="tile-grid">
+        <div v-for="n in 4" class="row">
+          <div v-for="n in 4" class="cell"></div>
+        </div>
 
-      <div v-for="tile in tiles"
-            :key="tile.id"
-            v-bind:style="{
-              top: `${ tile.y * (86.90169943749474 + 10) + 6}px`,
-              left: `${ tile.x * (56 + 10) + 9}px`
-              }"
-            v-bind:class="
-              tile.number === 1 ? 'tile-one tile' :
-              tile.number === 2 ? 'tile-two tile' : 'tile' ">
-        {{tile.number}}
+        <div v-for="tile in tiles"
+              :key="tile.id"
+              v-bind:style="{
+                top: `${ (tile.y - 1) * (86.90169943749474 + 10) + 5}px`,
+                left: `${ (tile.x - 1) * (56 + 10) + 8}px`
+                }"
+              v-bind:class="
+                tile.number === 1 ? 'tile-one tile' :
+                tile.number === 2 ? 'tile-two tile' : 'tile' ">
+          {{tile.number}}
+        </div>
       </div>
 
       <div v-on:click="newGame" class="new-game-button">
         New Game
       </div>
 
-    </div>
+      <div v-show="score" class="game-over-shroud">
 
-    <div v-show="score" class="game-over-shroud">
-      <div class="score">
-        Your score is {{score}}
-      </div>
-      <div class="game-over-text">
-        Game Over
-      </div>
-      <div v-on:click="newGame" class="new-game-shroud-button">
-        New Game
-      </div>
-    </div>
+        <div class="game-over-text">
+          Game Over
+        </div>
+        <div class="score">
+          Score: {{score}}
+        </div>
 
-  </div>
+        <div v-on:click="newGame" class="new-game-shroud-button">
+          Try Again
+        </div>
+      </div>
+
+    </div>
+  <!-- </div> -->
 </template>
 
 <script>
 
-const transitionInterval = 400
+const transitionInterval = 250
 
 export default {
   name: 'app',
@@ -401,9 +408,14 @@ export default {
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans+Condensed');
 
 #app {
-  width: 400px;
+  /*width: 400px;*/
   font-family: 'Fira Sans Condensed', sans-serif;
-  display: block;
+  position: relative;
+  background-color: #cfe7e0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .row {
@@ -418,13 +430,9 @@ export default {
   margin: 5px;
 }
 
-.row:nth-child(2) .cell, .row:nth-child(7) .cell, .cell:first-child, .cell:last-child {
-  background-color: rgba(0,0,0,0);
-}
-
-.grid {
+.tile-grid {
   position: relative;
-  background-color: #cfe7e0;
+  margin-bottom: 21px;
 }
 
 .tile {
@@ -438,18 +446,12 @@ export default {
   font-style: bold;
   line-height: 80.90169943749474px;
   background-color: white;
-  transition: 500ms;
+  transition: 250ms;
   font-family: 'Fira Sans Condensed', sans-serif;
 }
 
-.next-tile-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  position: absolute;
-  width: 100%;
-  height: 15%;
+.next-label {
+  margin-bottom: 10px;
 }
 
 .next-tile {
@@ -460,40 +462,64 @@ export default {
   font-size: 18px;
   line-height: 37.95px;
   position: relative;
+  margin-top: 25px;
+  margin-bottom: 5px;
 }
 
 .game-over-shroud {
-  width: 408px;
-  height: 590px;
+  width: 100%;
+  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
-  background-color: rgba(127, 127, 127, 0.7);
+  /*background-color: rgba(127, 127, 127, 0.7);*/
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
-  color: white;
+  color: #ddd;
   font-size: 30px;
+  line-height: 60px;
 }
 
 .tile-one {
   background-color: #72caf2;
   color: white;
+  border-color: #6ba6da;
 }
 
 .tile-two {
   background-color: #f16780;
   color: white;
+  border-color: #cd537c;
 }
 
 .new-game-button {
   text-align: center;
-  font-size: 24px;
+  font-size: 20px;
   background-color: #777e8c;
   border-bottom: 5px #494766 solid;
   border-radius: 5px;
-  width: 30%;
+  color: white;
+  margin-bottom: 25px;
+  padding: 4px 15px;
+}
+
+.new-game-button:hover, .new-game-shroud-button {
+  cursor: pointer;
+}
+
+.new-game-shroud-button {
+  text-align: center;
+  background-color: hsl(220, 8%, 30%);
+  border-radius: 5px;
+  border-bottom: 5px hsl(220, 8%, 12%) solid;
+  position: absolute;
+  bottom: 22px;
+  font-size: 20px;
+  line-height: 30px;
+  padding: 4px 25px;
 }
 
 </style>
