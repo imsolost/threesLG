@@ -1,21 +1,24 @@
 <template>
   <div id="app">
 
-    <div class="next-tile-cell">
-      <div v-bind:class="baseTileNumbers.slice(-1)[0] === 1
-        ? 'tile-one tile next-tile'
-          : baseTileNumbers.slice(-1)[0] === 2
-          ? 'tile-two tile next-tile'
-            : 'tile next-tile' ">
-        <!-- {{baseTileNumbers.slice(-1)[0]}} -->
-      </div>
-      <div>
-        Next
-      </div>
-    </div>
+
 
 
     <div class="tile-grid">
+
+      <div class="next-tile-cell">
+        <div v-bind:class="baseTileNumbers.slice(-1)[0] === 1
+          ? 'tile-one tile next-tile'
+            : baseTileNumbers.slice(-1)[0] === 2
+            ? 'tile-two tile next-tile'
+              : 'tile next-tile' ">
+          <!-- {{baseTileNumbers.slice(-1)[0]}} -->
+        </div>
+        <div>
+          Next
+        </div>
+      </div>
+
       <div v-for="n in 4" class="row">
         <div v-for="n in 4" class="cell"></div>
       </div>
@@ -23,7 +26,7 @@
       <div v-for="tile in tiles"
             :key="tile.id"
             v-bind:style="{
-              top: `${ (tile.y - 1) * (86.90169943749474 + 10) + 10}px`,
+              top: `${ (tile.y-1) * (86.90169943749474 + 10) + 10 + 104.7}px`,
               left: `${ (tile.x - 1) * (56 + 10) + 13}px`
               }"
             v-bind:class="
@@ -435,6 +438,10 @@ export default {
   border-radius: 15px;
   padding: 5px;
   border-bottom: 7px #bbd9d9 solid;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .tile {
@@ -456,7 +463,7 @@ export default {
   height: 36.45px;
   width: 25px;
   font-size: 18px;
-  line-height: 37.95px;
+  line-height: 36.45px;
   position: relative;
   margin-bottom: 5px;
   border-bottom-width: 4px;
@@ -465,10 +472,11 @@ export default {
 
 .next-tile-cell {
   padding: 5px;
-  background-color: #cfe7e0;
+  width: 30px;
+  background-color: #bbd9d9;
   border-radius: 5px;
-  margin-top: 25px;
-  margin-bottom: 25px;
+  margin-top: 15px;
+  margin-bottom: 15px;
   display: flex;
   flex-direction: column;
   justify-content: center;
