@@ -35,7 +35,7 @@ import {
   findScoreIfGameOver
 } from './utilities.js'
 
-const TRANSITION_INTERVAL = 250
+const TRANSITION_INTERVAL = 200
 
 export default {
   components: { GameOverShroud, NextTileCell, Tile },

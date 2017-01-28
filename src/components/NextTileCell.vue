@@ -36,7 +36,7 @@
   line-height: 36.45px;
   background-color: white;
   margin-bottom: 5px;
-  transition: 250ms;
+  transition: 200ms;
   font-family: 'Fira Sans Condensed', sans-serif;
 }
 

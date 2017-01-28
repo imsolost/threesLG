@@ -38,7 +38,7 @@
   font-style: bold;
   line-height: 80.90169943749474px;
   background-color: white;
-  transition: 250ms;
+  transition: 200ms;
   font-family: 'Fira Sans Condensed', sans-serif;
 }
 
