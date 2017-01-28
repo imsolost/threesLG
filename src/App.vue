@@ -35,7 +35,7 @@ import {
   findScoreIfGameOver
 } from './utilities.js'
 
-const transitionInterval = 250
+const TRANSITION_INTERVAL = 250
 
 export default {
   components: { GameOverShroud, NextTileCell, Tile },
@@ -50,12 +50,16 @@ export default {
       score: 0,
       locked: false,
       baseTileNumbers: [],
-      bigTileNumbers: []
+      bigTileNumbers: [],
+      test: false
     }
   },
   methods: {
     newGame() {
       this.initializeTiles()
+      if(this.test) {
+        this.tiles = [{x: 1, y: 1, number: 2, id: 2}, {x: 2, y: 1, number: 1, id: 1}]
+      }
       this.score = 0
     },
 
@@ -150,7 +154,7 @@ export default {
     },
 
     move: function (event) {
-      
+
       if (event.code === 'ArrowRight'
             || event.code === 'ArrowLeft'
             || event.code === 'ArrowUp'
@@ -162,19 +166,18 @@ export default {
       if (this.locked) return
 
       this.locked = true
-      setTimeout(() => this.locked = false, transitionInterval)
+      setTimeout(() => this.locked = false, TRANSITION_INTERVAL * 2)
 
       if (event.code === 'ArrowRight') {
 
         this.insertTile('left')
-
         setTimeout( () => {
           this.moveColumn(3, 'right')
           this.moveColumn(2, 'right')
           this.moveColumn(1, 'right')
           this.moveColumn(0, 'right')
-          setTimeout(() => this.score = findScoreIfGameOver(this.tiles), transitionInterval + 5)
-        }, 5)
+          setTimeout(() => this.score = findScoreIfGameOver(this.tiles), TRANSITION_INTERVAL * 2 + 5)
+        }, 15)
 
       } else if (event.code === 'ArrowLeft') {
 
@@ -184,8 +187,8 @@ export default {
           this.moveColumn(3, 'left')
           this.moveColumn(4, 'left')
           this.moveColumn(5, 'left')
-          setTimeout(() => this.score = findScoreIfGameOver(this.tiles), transitionInterval + 5)
-        }, 5)
+          setTimeout(() => this.score = findScoreIfGameOver(this.tiles), TRANSITION_INTERVAL * 2 + 5)
+        }, 15)
 
       } else if (event.code === 'ArrowUp') {
 
@@ -195,8 +198,8 @@ export default {
           this.moveRow(3, 'up')
           this.moveRow(4, 'up')
           this.moveRow(5, 'up')
-          setTimeout(() => this.score = findScoreIfGameOver(this.tiles), transitionInterval + 5)
-        }, 5)
+          setTimeout(() => this.score = findScoreIfGameOver(this.tiles), TRANSITION_INTERVAL * 2 + 5)
+        }, 15)
 
       } else if (event.code === 'ArrowDown') {
 
@@ -206,8 +209,8 @@ export default {
           this.moveRow(2, 'down')
           this.moveRow(1, 'down')
           this.moveRow(0, 'down')
-          setTimeout(() => this.score = findScoreIfGameOver(this.tiles), transitionInterval + 5)
-        }, 5)
+          setTimeout(() => this.score = findScoreIfGameOver(this.tiles), TRANSITION_INTERVAL * 2 + 5)
+        }, 15)
       } else if (event.code === 'Space') {
 
         this.newGame()
@@ -221,16 +224,21 @@ export default {
       if ((num1 === num2 && num1 > 2) || (num1 + num2 === 3)) {
 
         if (direction === 'horizontal') {
+          movingTile.top = true
           movingTile.x = movingTile.x + increment
         } else if (direction === 'vertical') {
+          movingTile.top = true
           movingTile.y = movingTile.y + increment
         }
 
         setTimeout(() => {
-            this.tiles.splice(this.tiles.indexOf(movingTile), 1)
-            targetTile.number = num1 + num2
+            setTimeout(() => {
+              this.tiles.splice(this.tiles.indexOf(targetTile), 1)
+              movingTile.top = false
+            }, TRANSITION_INTERVAL)
+            movingTile.number = num1 + num2
           },
-          transitionInterval
+          TRANSITION_INTERVAL
         )
       }
     },

@@ -38,6 +38,7 @@
   font-size: 30px;
   line-height: 60px;
   padding-top: 216px;
+  z-index: 10;
 }
 
 .new-game-shroud-button {

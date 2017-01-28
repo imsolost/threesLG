@@ -6,8 +6,9 @@
           left: `${ (tile.x - 1) * (56 + 10) + 13}px`
           }"
         :class="
-          tile.number === 1 ? 'tile-one tile' :
-          tile.number === 2 ? 'tile-two tile' : 'tile' ">
+          (tile.number === 1 ? 'tile-one tile' :
+          tile.number === 2 ? 'tile-two tile' : 'tile')
+          .concat(tile.top ? ' top' : '') ">
     {{tile.number}}
   </div>
 
@@ -21,6 +22,10 @@
 </script>
 
 <style>
+
+.top {
+  z-index: 5;
+}
 
 .tile {
   width: 50px;
