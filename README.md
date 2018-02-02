@@ -15,3 +15,4 @@ The problem is very clear and very simple.  It requires no backend...  though of
 2. Change directory into this repo with `$ cd threesLG`
 3. Run `$ npm install` in the terminal once you are in this project file.
 4. Run the `$ npm start` script. The game will automatically open in a new browser tab.
+5. Use the arrow keys to move the pieces on the board. 1 and 2 can combine to 3. 3s and higher combine with themself.
